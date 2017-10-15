@@ -145,27 +145,16 @@ public class LinkFragment extends DialogFragment {
             textView.setText(linkText);
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(R.string.rte_create_a_link)
                 .setView(view)
                 .setCancelable(false)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // OK button
-                        validate(dialog, addressView, textView);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Cancel button
-                        EventBus.getDefault().post(new LinkEvent(LinkFragment.this, new Link(null, url), true));
-                    }
-                });
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null);
 
         if (address != null) {
-            builder.setNeutralButton(R.string.rte_remove_action, new DialogInterface.OnClickListener() {
+            builder.setNeutralButton(R.string.rte_remove_action, new DialogInterface
+                    .OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     // Remove button
@@ -174,7 +163,33 @@ public class LinkFragment extends DialogFragment {
             });
         }
 
-        return builder.create();
+        final AlertDialog d = builder.create();
+
+        d.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(final DialogInterface dialogInterface) {
+                Button b = d.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        validate(dialogInterface, addressView, textView);
+                    }
+                });
+
+                Button c = d.getButton(AlertDialog.BUTTON_NEGATIVE);
+                c.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        EventBus.getDefault().post(new LinkEvent(LinkFragment.this, new Link
+                                (null, url), true));
+                    }
+                });
+            }
+        });
+
+        return d;
     }
 
     private void validate(DialogInterface dialog, TextView addressView, TextView textView) {
